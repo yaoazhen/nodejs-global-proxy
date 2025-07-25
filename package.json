@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-global-proxy",
+  "version": "1.0.0",
+  "main": "socks5-agent-injector.js",
+  "type": "module",
+  "scripts": {
+    "install-proxy": "bash ./install.sh",
+    "postinstall": "npm run install-proxy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaoazhen/nodejs-global-proxy.git"
+  },
+  "author": "Zane Yao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yaoazhen/nodejs-global-proxy/issues"
+  },
+  "homepage": "https://github.com/yaoazhen/nodejs-global-proxy#readme",
+  "description": "",
+  "dependencies": {
+    "socks-proxy-agent": "^8.0.5"
+  }
+}
