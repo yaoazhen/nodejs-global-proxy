@@ -52,10 +52,10 @@
 使用 npm 全局安装：
 
 ```bash
-npm install -g node-global-proxy
+npm install -g nodejs-process-proxy
 ```
 
-就这么简单！`np` 命令将在您的终端中全局可用。
+就这么简单！安装程序会自动设置 shell 函数，重启终端或运行 `source ~/.zshrc`（或 `~/.bashrc`）后，`np` 命令将在您的终端中可用。
 
 ---
 
@@ -89,6 +89,12 @@ np set "socks5://user:pass@127.0.0.1:1086"
 np set
 ```
 
+**示例（启用调试日志）：**
+
+```bash
+np set -log
+```
+
 ### 2. 禁用代理
 
 在当前终端会话中，为所有后续的 Node.js 进程停用全局 SOCKS5 代理：
@@ -105,34 +111,54 @@ np unset
 np status
 ```
 
-### 4. Shell 集成
+### 4. 获取帮助
 
-要使代理设置持久化，您可以将环境变量添加到您的 shell 配置文件中：
+查看所有可用命令：
+
+```bash
+np help
+```
+
+### 5. Shell 集成（可选）
+
+安装程序会自动将 shell 函数添加到您的 `~/.zshrc` 或 `~/.bashrc`。如果需要手动设置或在所有终端中持久化设置，您可以添加：
 
 ```bash
 # 添加到 ~/.bashrc 或 ~/.zshrc
 export NODEJS_GLOBAL_SOCKS5_PROXY="socks5://127.0.0.1:1086"
-export NODE_OPTIONS="--require $(npm root -g)/node-global-proxy/socks5-agent-injector.js"
+export NODE_OPTIONS="--require $(npm root -g)/nodejs-process-proxy/socks5-agent-injector.js"
 ```
 
 ---
 
 ## 测试代理
 
-要确认您的 Node.js 应用程序正在通过代理路由流量，您可以使用现有的 `get-ip.js` 文件（或任何其他向公共互联网发出 HTTP/HTTPS 请求的 Node.js 脚本）。
+本包包含一个综合测试脚本来验证代理是否正常工作：
 
-1. **确保您的 `get-ip.js`（或类似）文件已准备就绪**：
-   确保您的 `get-ip.js` 文件使用 Node.js 的标准 `http` 或 `https` 模块来获取公共 IP 地址（例如，从 `https://ipv4.icanhazip.com`）。
-
-2. **在启用代理的同一终端会话中运行您的测试脚本**：
-
+1. **启用带调试日志的代理**：
    ```bash
-   node /path/to/your/get-ip.js
+   np set -log
    ```
 
-   （将 `/path/to/your/get-ip.js` 替换为您文件的实际路径，或先导航到其目录。）
+2. **运行测试脚本**：
+   ```bash
+   node $(npm root -g)/nodejs-process-proxy/test/test-proxy.js
+   ```
 
-3. **预期结果**：如果代理工作正常，输出的 IP 地址应该是您的**代理服务器的公共 IP**，而不是您的原始直接 IP。如果显示您的原始 IP，则表明 Node.js 没有使用代理。
+3. **预期结果**：
+   - 测试将检查 HTTP、HTTPS 和 Fetch API 请求
+   - 所有方法都应返回您的**代理服务器的公共 IP**，而不是您的原始 IP
+   - 调试日志将显示请求通过代理路由
+   - 将显示位置信息
+
+4. **测试不使用代理的情况**：
+   ```bash
+   np unset
+   node $(npm root -g)/nodejs-process-proxy/test/test-proxy.js
+   ```
+   这应该显示您的原始 IP 地址。
+
+您也可以使用 Node.js 的标准 `http`、`https` 模块或 `fetch()` API 创建自己的测试脚本来验证代理功能。
 
 ---
 
@@ -154,7 +180,10 @@ export NODE_OPTIONS="--require $(npm root -g)/node-global-proxy/socks5-agent-inj
 
 ## 故障排除
 
-* **找不到 `np` 命令**：确保您在安装后运行了 `source ~/.zshrc`（或 `~/.bashrc`）或打开了新终端。
+* **找不到 `np` 命令**：
+  * 确保全局安装成功：`npm list -g nodejs-process-proxy`
+  * 尝试重新安装：`npm install -g nodejs-process-proxy`
+  * 重启终端或运行 `source ~/.zshrc`（或 `~/.bashrc`）
 * **IP 地址没有改变**：
   * **验证您的 SOCKS5 代理服务器正在运行并可在指定的地址/端口上访问**。使用 `curl -x socks5h://your.proxy.address:port https://ipv4.icanhazip.com` 进行独立测试。
   * 确保您在运行 Node.js 应用程序的**同一终端会话**中运行了 `np set`。

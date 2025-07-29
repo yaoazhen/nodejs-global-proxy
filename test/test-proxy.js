@@ -94,13 +94,13 @@ async function getLocationInfo() {
     try {
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
-        
+
         console.log(`${CYAN}Location Info:${NC}`);
         console.log(`  IP: ${data.ip}`);
         console.log(`  Country: ${data.country_name}`);
         console.log(`  City: ${data.city}`);
         console.log(`  Region: ${data.region}`);
-        
+
         return data;
     } catch (error) {
         console.error(`${RED}Location test failed: ${error.message}${NC}`);
@@ -117,28 +117,28 @@ async function runAllTests() {
     try {
         // Test 1: HTTP module
         results.http = await getIPviaHTTP();
-        
+
         console.log(''); // Empty line for spacing
-        
+
         // Test 2: HTTPS module
         results.https = await getIPviaHTTPS();
-        
+
         console.log(''); // Empty line for spacing
-        
+
         // Test 3: Fetch API
         results.fetch = await getIPviaFetch();
-        
+
         console.log(''); // Empty line for spacing
-        
+
         // Test 4: Location information
         await getLocationInfo();
-        
+
         console.log(''); // Empty line for spacing
-        
+
         // Compare results
         const ips = [results.http, results.https, results.fetch.split(',')[0].trim()];
         const uniqueIPs = [...new Set(ips)];
-        
+
         if (uniqueIPs.length === 1) {
             console.log(`${GREEN}✅ All methods returned the same IP: ${uniqueIPs[0]}${NC}`);
         } else {
@@ -147,7 +147,7 @@ async function runAllTests() {
             console.log(`   HTTPS: ${results.https}`);
             console.log(`   Fetch: ${results.fetch}`);
         }
-        
+
         // Check if proxy is working
         const proxyEnv = process.env.NODEJS_GLOBAL_SOCKS5_PROXY;
         if (proxyEnv) {
@@ -155,9 +155,9 @@ async function runAllTests() {
         } else {
             console.log(`${YELLOW}⚠️  No proxy configured${NC}`);
         }
-        
+
         console.log(`\n${GREEN}All tests completed successfully!${NC}`);
-        
+
     } catch (error) {
         console.error(`${RED}Test failed: ${error.message}${NC}`);
     }

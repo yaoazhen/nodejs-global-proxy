@@ -53,10 +53,10 @@ This project gives you a simple way to set up a **SOCKS5 proxy for Node.js proce
 Install globally using npm:
 
 ```bash
-npm install -g node-global-proxy
+npm install -g nodejs-process-proxy
 ```
 
-That's it! The `np` command will be available globally in your terminal.
+That's it! The installation will automatically set up shell functions, and the `np` command will be available in your terminal after restarting it or running `source ~/.zshrc` (or `~/.bashrc`).
 
 -----
 
@@ -90,6 +90,12 @@ np set "socks5://user:pass@127.0.0.1:1086"
 np set
 ```
 
+**Example (with debug logging):**
+
+```bash
+np set -log
+```
+
 ### 2. Disable the Proxy
 
 To deactivate the global SOCKS5 proxy for all subsequent Node.js processes in the current terminal session:
@@ -106,34 +112,54 @@ To check the current proxy status:
 np status
 ```
 
-### 4. Shell Integration
+### 4. Get Help
 
-For persistent proxy settings, you can add the environment variables to your shell profile:
+To see all available commands:
+
+```bash
+np help
+```
+
+### 5. Shell Integration (Optional)
+
+The installation automatically adds shell functions to your `~/.zshrc` or `~/.bashrc`. If you need to set up manually or for persistent settings across all terminals, you can add:
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 export NODEJS_GLOBAL_SOCKS5_PROXY="socks5://127.0.0.1:1086"
-export NODE_OPTIONS="--require $(npm root -g)/node-global-proxy/socks5-agent-injector.js"
+export NODE_OPTIONS="--require $(npm root -g)/nodejs-process-proxy/socks5-agent-injector.js"
 ```
 
 -----
 
 ## Testing the Proxy
 
-To confirm that your Node.js applications are routing traffic through the proxy, you can use your existing `get-ip.js` file (or any other Node.js script that makes HTTP/HTTPS requests to the public internet).
+The package includes a comprehensive test script to verify that your proxy is working correctly:
 
-1.  **Ensure your `get-ip.js` (or similar) file is ready**:
-    Make sure your `get-ip.js` file uses Node.js's standard `http` or `https` modules to fetch a public IP address (e.g., from `https://ipv4.icanhazip.com`).
-
-2.  **Run your test script** in the **same terminal session** where you enabled the proxy:
-
+1.  **Enable the proxy with debug logging**:
     ```bash
-    node /path/to/your/get-ip.js
+    np set -log
     ```
 
-    (Replace `/path/to/your/get-ip.js` with the actual path to your file, or navigate to its directory first.)
+2.  **Run the test script**:
+    ```bash
+    node $(npm root -g)/nodejs-process-proxy/test/test-proxy.js
+    ```
 
-3.  **Expected Outcome**: If the proxy is working correctly, the outputted IP address should be your **proxy server's public IP**, not your original direct IP. If it shows your original IP, the proxy isn't being used by Node.js.
+3.  **Expected Outcome**: 
+    - The test will check HTTP, HTTPS, and Fetch API requests
+    - All methods should return your **proxy server's public IP**, not your original IP
+    - Debug logs will show requests being routed through the proxy
+    - Location information will be displayed
+
+4.  **Test without proxy**:
+    ```bash
+    np unset
+    node $(npm root -g)/nodejs-process-proxy/test/test-proxy.js
+    ```
+    This should show your original IP address.
+
+You can also create your own test script using Node.js's standard `http`, `https` modules or `fetch()` API to verify the proxy functionality.
 
 -----
 
@@ -156,15 +182,16 @@ To confirm that your Node.js applications are routing traffic through the proxy,
 ## Troubleshooting
 
   * **`np` command not found**: 
-      * Make sure the global installation was successful: `npm list -g node-global-proxy`
-      * Try reinstalling: `npm install -g node-global-proxy`
+      * Make sure the global installation was successful: `npm list -g nodejs-process-proxy`
+      * Try reinstalling: `npm install -g nodejs-process-proxy`
+      * Restart your terminal or run `source ~/.zshrc` (or `~/.bashrc`)
   * **IP address not changing**:
       * **Verify your SOCKS5 proxy server is running and accessible** on the specified address/port. Use `curl -x socks5h://your.proxy.address:port https://ipv4.icanhazip.com` to test independently.
       * Check current status: `np status`
       * Ensure you set the proxy in the **same terminal session** where you're running your Node.js app.
       * Check for any errors when `node` starts (look for `[Node.js Global Proxy]` messages).
       * If your proxy requires authentication, make sure the `np set` command includes the `user:pass@` part in the URI.
-  * **Permission errors during installation**: Try using `sudo npm install -g node-global-proxy` (on macOS/Linux) or run your terminal as administrator (on Windows).
+  * **Permission errors during installation**: Try using `sudo npm install -g nodejs-process-proxy` (on macOS/Linux) or run your terminal as administrator (on Windows).
   * **Environment variables not persisting**: Use the shell integration commands provided by `np set` to make settings permanent.
 
 -----

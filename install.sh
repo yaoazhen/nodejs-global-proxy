@@ -84,6 +84,25 @@ np() {
             
             echo -e \"\\033[0;32m✅ Node.js SOCKS5 proxy ENABLED: \\033[0;33m\$proxy_uri\\033[0m\"
             echo -e \"\\033[0;32mNODE_OPTIONS set to: \\033[0;33m\$NODE_OPTIONS\\033[0m\"
+            
+            # Run test to verify proxy is working
+            echo \"\"
+            echo -e \"\\033[0;34m🧪 Testing proxy configuration...\\033[0m\"
+            local test_script=\"$NPM_GLOBAL_PATH/nodejs-process-proxy/test/test-proxy.js\"
+            if [ -f \"\$test_script\" ]; then
+                node \"\$test_script\"
+                if [ \$? -eq 0 ]; then
+                    echo \"\"
+                    echo -e \"\\033[0;32m✅ Proxy test completed successfully!\\033[0m\"
+                    echo -e \"\\033[0;34mYour proxy is now configured. All Node.js applications will use the proxy.\\033[0m\"
+                else
+                    echo \"\"
+                    echo -e \"\\033[0;33m⚠️  Proxy test finished with warnings. Check the output above.\\033[0m\"
+                fi
+            else
+                echo -e \"\\033[0;33m⚠️  Test script not found, skipping automatic test.\\033[0m\"
+                echo -e \"\\033[0;34mYou can manually test with: node \$test_script\\033[0m\"
+            fi
             ;;
         unset)
             unset NODEJS_GLOBAL_SOCKS5_PROXY
