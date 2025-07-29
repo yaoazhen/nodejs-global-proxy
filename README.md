@@ -1,11 +1,11 @@
 -----
 
-# Node.js Global SOCKS5 Proxy Manager
+# Node.js Process SOCKS5 Proxy Manager
 
-This project gives you a simple way to set up a **global SOCKS5 proxy** for all your Node.js apps without touching any project code. It works by injecting a proxy agent into Node.js's built-in `http` and `https` modules using the `NODE_OPTIONS` environment variable.
+This project gives you a simple way to set up a **SOCKS5 proxy for Node.js processes** without touching any project code. It works by injecting a proxy agent into Node.js's built-in `http` and `https` modules using the `NODE_OPTIONS` environment variable.
 
 > **⚠️ Important Notes:**
-> - **This tool requires an existing SOCKS5 proxy server** - it does NOT create or provide a SOCKS5 server for you
+> - **This tool requires an existing SOCKS5 proxy server like Shadowsocks** - it does NOT create or provide a SOCKS5 server for you
 > - **Node.js applications only** - this proxy configuration affects ONLY Node.js processes, not your system-wide network traffic or other applications (browsers, curl, etc.)
 
 ## Project Purpose
@@ -27,7 +27,7 @@ This project gives you a simple way to set up a **global SOCKS5 proxy** for all 
 
 ## Features
 
-  * **Global Scope**: The proxy applies to any Node.js process you start in the configured terminal session.
+  * **Process Scope**: The proxy applies to any Node.js process you start in the configured terminal session.
   * **No Code Changes**: Your Node.js projects stay exactly as they are.
   * **Easy Control**: Simple `np set` and `np unset` commands let you turn the proxy on and off.
   * **SOCKS5 Support**: It uses `socks-proxy-agent` for robust SOCKS5 proxy handling, including authentication.
@@ -40,7 +40,7 @@ This project gives you a simple way to set up a **global SOCKS5 proxy** for all 
   * **A running SOCKS5 proxy server** that you can connect to (e.g., `socks5://127.0.0.1:1086`).
     
     > **📋 Note:** You must have your own SOCKS5 proxy server already set up and running. This could be:
-    > - A local proxy server (like Shadowsocks, V2Ray, etc.)
+    > - A local proxy server (like Shadowsocks, V2Ray, Clash, etc.)
     > - A remote SOCKS5 proxy service
     > - A corporate proxy server
     > 
@@ -50,44 +50,21 @@ This project gives you a simple way to set up a **global SOCKS5 proxy** for all 
 
 ## Installation
 
-1.  **Clone this repository** to your local machine:
+Install globally using npm:
 
-    ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
-    ```
+```bash
+npm install -g node-global-proxy
+```
 
-    (Replace `your-username/your-repo-name` with your actual GitHub repository path.)
-
-2.  **Run the installation script**:
-    This script will set up the necessary Node.js module (`socks-proxy-agent`) and configure shell functions (`np`) in your `~/.zshrc` (or `~/.bashrc`).
-
-    ```bash
-    chmod +x install.sh
-    ./install.sh
-    ```
-
-      * The script will detect your shell (`.zshrc` or `.bashrc`) and add the functions there.
-      * You might see `package.json already exists. Skipping npm init.` if you've run it before; this is normal.
-
-3.  **Reload your shell configuration**:
-    Open a **new terminal window/tab**, or run:
-
-    ```bash
-    source ~/.zshrc  # If you use Zsh
-    # OR
-    source ~/.bashrc # If you use Bash
-    ```
-
-    This step is essential for the `np` command to become available in your current terminal session.
+That's it! The `np` command will be available globally in your terminal.
 
 -----
 
 ## Usage
 
-Once installed and your shell reloaded, you can use the following commands in your terminal:
+After installation, you can use the following commands in your terminal:
 
-### 1\. Enable the Proxy
+### 1. Enable the Proxy
 
 To activate the global SOCKS5 proxy for all subsequent Node.js processes in the current terminal session:
 
@@ -107,9 +84,13 @@ np set "socks5://127.0.0.1:1086"
 np set "socks5://user:pass@127.0.0.1:1086"
 ```
 
-You'll see a confirmation message indicating the proxy is enabled.
+**Example (using default proxy):**
 
-### 2\. Disable the Proxy
+```bash
+np set
+```
+
+### 2. Disable the Proxy
 
 To deactivate the global SOCKS5 proxy for all subsequent Node.js processes in the current terminal session:
 
@@ -117,7 +98,23 @@ To deactivate the global SOCKS5 proxy for all subsequent Node.js processes in th
 np unset
 ```
 
-You'll see a confirmation message indicating the proxy is disabled.
+### 3. Check Status
+
+To check the current proxy status:
+
+```bash
+np status
+```
+
+### 4. Shell Integration
+
+For persistent proxy settings, you can add the environment variables to your shell profile:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export NODEJS_GLOBAL_SOCKS5_PROXY="socks5://127.0.0.1:1086"
+export NODE_OPTIONS="--require $(npm root -g)/node-global-proxy/socks5-agent-injector.js"
+```
 
 -----
 
@@ -142,10 +139,11 @@ To confirm that your Node.js applications are routing traffic through the proxy,
 
 ## How It Works
 
-  * **`install.sh`**: Sets up the project directory, installs `socks-proxy-agent`, and adds the `np` shell function to your `~/.zshrc` (or `~/.bashrc`).
+  * **`npm install -g`**: Installs the package globally, making the `np` command available system-wide.
   * **`np set`**:
       * Sets the `NODEJS_GLOBAL_SOCKS5_PROXY` environment variable to your specified proxy address.
-      * Sets the `NODE_OPTIONS` environment variable to `--require /path/to/this/repo/socks5-agent-injector.js`.
+      * Sets the `NODE_OPTIONS` environment variable to `--require /path/to/socks5-agent-injector.js`.
+      * Provides shell commands to make the settings persistent.
   * **`NODE_OPTIONS`**: This powerful Node.js environment variable tells Node.js to load `socks5-agent-injector.js` *before* any other application code runs.
   * **`socks5-agent-injector.js`**:
       * Reads the `NODEJS_GLOBAL_SOCKS5_PROXY` variable.
@@ -157,14 +155,17 @@ To confirm that your Node.js applications are routing traffic through the proxy,
 
 ## Troubleshooting
 
-  * **`np` command not found**: Make sure you ran `source ~/.zshrc` (or `~/.bashrc`) or opened a new terminal after installation.
+  * **`np` command not found**: 
+      * Make sure the global installation was successful: `npm list -g node-global-proxy`
+      * Try reinstalling: `npm install -g node-global-proxy`
   * **IP address not changing**:
       * **Verify your SOCKS5 proxy server is running and accessible** on the specified address/port. Use `curl -x socks5h://your.proxy.address:port https://ipv4.icanhazip.com` to test independently.
-      * Ensure you ran `np set` in the **same terminal session** where you're running your Node.js app.
-      * Check for any errors during `install.sh` or when `node` starts (look for `[Node.js Global Proxy]` messages).
+      * Check current status: `np status`
+      * Ensure you set the proxy in the **same terminal session** where you're running your Node.js app.
+      * Check for any errors when `node` starts (look for `[Node.js Global Proxy]` messages).
       * If your proxy requires authentication, make sure the `np set` command includes the `user:pass@` part in the URI.
-  * **`ReferenceError: require is not defined`**: Your Node.js environment is running in ES Module (ESM) mode. The `socks5-agent-injector.js` file has been adjusted for this (using `import`). Make sure you're using the latest version of `socks5-agent-injector.js` provided in our previous discussion.
-  * **Performance Warning (`MODULE_TYPELESS_PACKAGE_JSON`)**: This is a warning, not an error. To remove it, add `"type": "module"` to your `package.json` file in the project root.
+  * **Permission errors during installation**: Try using `sudo npm install -g node-global-proxy` (on macOS/Linux) or run your terminal as administrator (on Windows).
+  * **Environment variables not persisting**: Use the shell integration commands provided by `np set` to make settings permanent.
 
 -----
 

@@ -1,23 +1,38 @@
 {
-  "name": "nodejs-global-proxy",
-  "version": "1.1.0",
+  "name": "nodejs-process-proxy",
+  "version": "1.2.0",
+  "description": "A simple tool to set up SOCKS5 proxy for Node.js processes without modifying project code",
   "main": "socks5-agent-injector.js",
   "type": "module",
-  "scripts": {
-    "install-proxy": "bash ./install.sh",
-    "postinstall": "npm run install-proxy"
+  "bin": {
+    "np": "./bin/np.js"
   },
+  "files": [
+    "socks5-agent-injector.js",
+    "bin/np.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "proxy",
+    "socks5",
+    "nodejs",
+    "global",
+    "network",
+    "http",
+    "https"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaoazhen/nodejs-global-proxy.git"
+    "url": "git+https://github.com/yaoazhen/nodejs-process-proxy.git"
   },
   "author": "Zane Yao",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yaoazhen/nodejs-global-proxy/issues"
+    "url": "https://github.com/yaoazhen/nodejs-process-proxy/issues"
   },
-  "homepage": "https://github.com/yaoazhen/nodejs-global-proxy#readme",
-  "description": "",
+  "homepage": "https://github.com/yaoazhen/nodejs-process-proxy#readme",
   "dependencies": {
     "node-fetch": "^2.7.0",
     "socks-proxy-agent": "^8.0.5"
