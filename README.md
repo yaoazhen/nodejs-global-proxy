@@ -4,6 +4,25 @@
 
 This project gives you a simple way to set up a **global SOCKS5 proxy** for all your Node.js apps without touching any project code. It works by injecting a proxy agent into Node.js's built-in `http` and `https` modules using the `NODE_OPTIONS` environment variable.
 
+> **⚠️ Important Notes:**
+> - **This tool requires an existing SOCKS5 proxy server** - it does NOT create or provide a SOCKS5 server for you
+> - **Node.js applications only** - this proxy configuration affects ONLY Node.js processes, not your system-wide network traffic or other applications (browsers, curl, etc.)
+
+## Project Purpose
+
+**Main Use Cases:**
+- **Network Proxy Management**: Provides a unified SOCKS5 proxy solution for Node.js applications
+- **Development Environment Setup**: Essential for development environments that need to access external resources through a proxy
+- **Network Request Routing**: Automatically routes all HTTP/HTTPS requests through a specified SOCKS5 proxy server
+- **Transparent Proxy Injection**: Adds proxy functionality to any Node.js project without modifying existing code
+
+**Ideal Scenarios:**
+- Development environments requiring proxy server access to external APIs
+- Node.js application development in corporate intranet environments
+- Network request scenarios requiring IP address masking
+- Testing application behavior under different network conditions
+- Bypassing network restrictions or firewalls during development
+
 -----
 
 ## Features
@@ -18,7 +37,14 @@ This project gives you a simple way to set up a **global SOCKS5 proxy** for all 
 ## Prerequisites
 
   * **Node.js** (v14 or higher recommended) and **npm** installed on your system.
-  * A **running SOCKS5 proxy server** that you can connect to (e.g., `socks5://127.0.0.1:1086`).
+  * **A running SOCKS5 proxy server** that you can connect to (e.g., `socks5://127.0.0.1:1086`).
+    
+    > **📋 Note:** You must have your own SOCKS5 proxy server already set up and running. This could be:
+    > - A local proxy server (like Shadowsocks, V2Ray, etc.)
+    > - A remote SOCKS5 proxy service
+    > - A corporate proxy server
+    > 
+    > This tool does **NOT** provide or create a SOCKS5 server - it only configures Node.js to use an existing one.
 
 -----
 
