@@ -25,15 +25,17 @@ function showUsage() {
     log('yellow', 'Usage: np <command> [options]');
     console.log('');
     console.log('Commands:');
-    console.log('  set [proxy_uri]    Enable SOCKS5 proxy for Node.js processes');
-    console.log('                     Default: socks5://127.0.0.1:1086');
-    console.log('  unset              Disable SOCKS5 proxy for Node.js processes');
-    console.log('  status             Show current proxy status');
+    console.log('  set [proxy_uri] [-log]  Enable SOCKS5 proxy for Node.js processes');
+    console.log('                          Default: socks5://127.0.0.1:1086');
+    console.log('                          -log: Enable debug logging');
+    console.log('  unset                   Disable SOCKS5 proxy for Node.js processes');
+    console.log('  status                  Show current proxy status');
     console.log('');
     console.log('Examples:');
     console.log('  np set "socks5://127.0.0.1:1086"');
-    console.log('  np set "socks5://user:pass@127.0.0.1:1086"');
-    console.log('  np set             (uses default: socks5://127.0.0.1:1086)');
+    console.log('  np set "socks5://user:pass@127.0.0.1:1086" -log');
+    console.log('  np set -log             (uses default proxy with debug logging)');
+    console.log('  np set                  (uses default: socks5://127.0.0.1:1086)');
     console.log('  np unset');
     console.log('  np status');
     console.log('');
@@ -51,7 +53,7 @@ function getInjectorPath() {
     return injectorPath;
 }
 
-function setProxy(proxyUri) {
+function setProxy(proxyUri, enableLog = false) {
     const defaultProxy = 'socks5://127.0.0.1:1086';
     const uri = proxyUri || defaultProxy;
     
@@ -66,14 +68,26 @@ function setProxy(proxyUri) {
     process.env.NODEJS_GLOBAL_SOCKS5_PROXY = uri;
     process.env.NODE_OPTIONS = `--require ${injectorPath}`;
     
+    // Set log environment variable if -log flag is provided
+    if (enableLog) {
+        process.env.NODEJS_PROXY_DEBUG_LOG = 'true';
+    }
+    
     log('green', `Node.js process SOCKS5 proxy ENABLED to: ${uri}`);
     log('green', `NODE_OPTIONS set to: ${process.env.NODE_OPTIONS}`);
+    
+    if (enableLog) {
+        log('green', 'Debug logging ENABLED');
+    }
     
     // Show instructions for shell integration
     console.log('');
     log('blue', 'To make this setting persistent in your current shell session, run:');
     log('yellow', `export NODEJS_GLOBAL_SOCKS5_PROXY="${uri}"`);
     log('yellow', `export NODE_OPTIONS="--require ${injectorPath}"`);
+    if (enableLog) {
+        log('yellow', `export NODEJS_PROXY_DEBUG_LOG="true"`);
+    }
     console.log('');
     log('blue', 'Or add these lines to your ~/.bashrc or ~/.zshrc for permanent setup.');
 }
@@ -81,17 +95,20 @@ function setProxy(proxyUri) {
 function unsetProxy() {
     delete process.env.NODEJS_GLOBAL_SOCKS5_PROXY;
     delete process.env.NODE_OPTIONS;
+    delete process.env.NODEJS_PROXY_DEBUG_LOG;
     
     log('green', 'Node.js process SOCKS5 proxy DISABLED.');
     console.log('');
     log('blue', 'To make this setting persistent in your current shell session, run:');
     log('yellow', 'unset NODEJS_GLOBAL_SOCKS5_PROXY');
     log('yellow', 'unset NODE_OPTIONS');
+    log('yellow', 'unset NODEJS_PROXY_DEBUG_LOG');
 }
 
 function showStatus() {
     const proxyUri = process.env.NODEJS_GLOBAL_SOCKS5_PROXY;
     const nodeOptions = process.env.NODE_OPTIONS;
+    const debugLog = process.env.NODEJS_PROXY_DEBUG_LOG;
     
     log('blue', 'Current Node.js Process Proxy Status:');
     console.log('');
@@ -108,6 +125,12 @@ function showStatus() {
         log('yellow', '✗ NODE_OPTIONS: Not configured for proxy');
     }
     
+    if (debugLog === 'true') {
+        log('green', '✓ Debug Logging: ENABLED');
+    } else {
+        log('yellow', '✗ Debug Logging: DISABLED');
+    }
+    
     console.log('');
     if (proxyUri && nodeOptions) {
         log('green', 'Status: Proxy is ENABLED for Node.js applications');
@@ -122,7 +145,20 @@ const command = args[0];
 
 switch (command) {
     case 'set':
-        setProxy(args[1]);
+        // Parse arguments for set command
+        let proxyUri = null;
+        let enableLog = false;
+        
+        // Check for -log flag and proxy URI
+        for (let i = 1; i < args.length; i++) {
+            if (args[i] === '-log') {
+                enableLog = true;
+            } else if (!proxyUri && !args[i].startsWith('-')) {
+                proxyUri = args[i];
+            }
+        }
+        
+        setProxy(proxyUri, enableLog);
         break;
     case 'unset':
         unsetProxy();
