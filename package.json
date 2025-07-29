@@ -1,15 +1,11 @@
 {
   "name": "nodejs-process-proxy",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "A simple tool to set up SOCKS5 proxy for Node.js processes without modifying project code",
   "main": "socks5-agent-injector.js",
   "type": "module",
-  "bin": {
-    "np": "./bin/np.js"
-  },
   "files": [
     "socks5-agent-injector.js",
-    "bin/np.js",
     "postinstall.js",
     "install.sh",
     "test/"
